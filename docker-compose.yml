@@ -1,0 +1,186 @@
+version: "3.3"
+services:
+  # Spark Master
+  spark-master:
+    # build:
+    #   context: ./spark-code/.
+    image: sonem/cluster-apache-spark:3.5.2-v4
+    container_name: master
+    ports:
+      - "9090:8080"
+      - "7077:7077"
+      - "6066:6066"
+    # volumes:
+    #    - ./spark-code/apps:/opt/spark-apps
+    #    - ./spark-code/data:/opt/spark-data
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
+
+  # Spark Worker A
+  spark-worker-a:
+    # build:
+    #   context: ./spark-code/.
+    image: sonem/cluster-apache-spark:3.5.2-v4
+    container_name: worker-a
+    ports:
+      - "9091:8080"
+      - "7001:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-a
+    # volumes:
+    #    - ./spark-code/apps:/opt/spark-apps
+    #    - ./spark-code/data:/opt/spark-data
+  
+  # Spark Worker B
+  spark-worker-b:
+    # build:
+    #   context: ./spark-code/.
+    image: sonem/cluster-apache-spark:3.5.2-v4
+    container_name: worker-b
+    ports:
+      - "9092:8080"
+      - "7002:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-b
+    # volumes:
+    #    - ./spark-code/apps:/opt/spark-apps
+    #    - ./spark-code/data:/opt/spark-data
+  
+  # Spark Worker C
+  spark-worker-c:
+    # build:
+    #   context: ./spark-code/.
+    image: sonem/cluster-apache-spark:3.5.2-v4
+    container_name: worker-c
+    ports:
+      - "9093:8080"
+      - "7003:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-c
+    # volumes:
+    #    - ./spark-code/apps:/opt/spark-apps
+    #    - ./spark-code/data:/opt/spark-data
+  
+  # Spark Worker D
+  spark-worker-d:
+    # build:
+    #   context: ./spark-code/.
+    image: sonem/cluster-apache-spark:3.5.2-v4
+    container_name: worker-d
+    ports:
+      - "9094:8080"
+      - "7004:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-d
+    # volumes:
+    #    - ./spark-code/apps:/opt/spark-apps
+    #    - ./spark-code/data:/opt/spark-data
+  
+  # Spark Worker E
+  spark-worker-e:
+    # build:
+    #   context: ./spark-code/.
+    image: sonem/cluster-apache-spark:3.5.2-v4
+    container_name: worker-e
+    ports:
+      - "9095:8080"
+      - "7005:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-e
+    # volumes:
+    #    - ./spark-code/apps:/opt/spark-apps
+    #    - ./spark-code/data:/opt/spark-data
+  
+  # Mongo DBMS
+  mongo:
+    image: mongo:7.0.9
+    container_name: mongo-dbms
+    # volumes:
+    #   - ./data:/data/db
+    ports:
+      - "27017:27017"
+
+  # MinIO Storage
+  minio:
+    image: quay.io/minio/minio:RELEASE.2024-08-03T04-33-23Z
+    container_name: minio-storage
+    # volumes:
+    #   - ./data:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: 'admin12345'
+      MINIO_ROOT_PASSWORD: 'admin12345'
+      MINIO_ADDRESS: ':9000'
+      MINIO_CONSOLE_ADDRESS: ':9001'
+    command: minio server /data
+
+  # Main Flask Application
+  flask-app:
+    # build:
+    #   context: ./flask-server/.
+    image: sonem/cluster-flask-app:1.0.0
+    container_name: server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+      - minio
+      - spark-master
+    # volumes:
+    #   - ./flask-server:/app
+    environment:
+      APP_HOST: '0.0.0.0'
+      APP_PORT: 5000
+      MONGO_HOST: mongo
+      MONGO_PORT: 27017
+      MONGO_DATABASE: "EverCluster"
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_SERVER_PORT: 9001
+      MINIO_USER: "admin12345"
+      MINIO_PASS: "admin12345"
+      SPARK_HOST: spark-master
+      SPARK_PORT: 6066

@@ -1,0 +1,2 @@
+docker build -t sonem/cluster-flask-app:1.0.0 .
+docker push sonem/cluster-flask-app:1.0.0

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+	<title>EverCluster - Dataset Upload</title>
+	<link rel="stylesheet" href="./static/styles/styles.css">
+    <link rel="stylesheet" href="./static/styles/metadata.css">
+	
+	<!-- Latest minified CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- Bootstrap Packaged JS (Bundle) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</head>
+<body>
+	<div class="sidenav">
+        <img src="./static/images/LOGO_INVERTED_WHITE.png" alt="LOGO" class="center" style="width:90%;"> 
+        <br>
+        <div class="username border-bottom text-white"><img src="./static/images/user.png" alt="user image" width="30" height="30" align="left">&nbsp;&nbsp;{{user}}<br></div>
+        {% if master_online == True %}
+            <div class="username border-bottom"> Master: <span class="text-success">Online</span></div>
+        {% else %}
+            <div class="username border-bottom"> Master: <span class="text-danger">Offline</span></div>
+        {% endif %}
+        <div class="username border-bottom"> Workers: <span class="text-white">{{ worker_amount }}</span></div><br><br>
+
+        <div class="username border-bottom text-white"> Navigation Menu</div>
+        <a href="./upload" class="border-bottom border-top">Upload Data</a>
+        <a href="./clustering" class="border-bottom">Clustering</a>
+        <a href="./clustering_results" class="border-bottom">Results</a>
+        <a href="./logout" class="border-bottom">Log out</a>
+    </div>
+      
+    <div class="main">
+        <!-- Always on top -->
+        <div class="jumbotron jumbotron-fluid" style="background-color: lightgray;">
+            <div class="container">
+              <h1 class="display-4">
+                <strong>Dataset Upload</strong>
+              </h1>
+              <p class="lead">Use the form provided to Upload Datasets. You can also see your already uploaded datasets below.</p>
+            </div>
+        </div>
+        <br>
+
+        <!-- Dataset Form -->
+        <div class="container border border-dark">
+        
+        	<form class="container" method="post" enctype="multipart/form-data">
+        	
+        		<!-- Dataset label -->
+        		<div class="form-group small">
+                    <label for="dataset_label">Give a label for your dataset</label>
+                    <input type="text" class="form-control" id="dataset_label" name="dataset_label" placeholder="A name for your dataset" required>
+                </div>
+        	
+        		<!-- Dataset File -->
+        		<div class="form-group small">
+                    <label for="dataset_file">Choose the file that you want to upload</label>
+                    <input type="file" class="form-control" id="dataset_file" name="dataset_file" placeholder="Choose your file to upload" required>
+                </div>
+                
+                <!-- Dataset Submit -->
+                <button id="submitDataset" name="submitDataset" type="submit" class="btn btn-dark">Upload Dataset</button>
+            </form>
+            
+            <br>
+            
+            <!-- WARNINGS -->
+            <div class="container" style="font-size: medium;">
+            	{% if error %}
+                <div class="alert alert-warning" role="alert">
+                    {{ error }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <br>
+
+            <!-- Datasets Information -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingOne">
+                    <button class="accordion-button collapsed border border-dark" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne" id="collectionButton">
+                    <strong>Uploaded Datasets</strong>
+                    </button>
+                </h2>
+                <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlush">
+                    <div class="accordion-body">
+                        
+                        {% if datasets | length == 0 %}
+                        <!-- No Collections Warning -->
+                        <div class="container" style="font-size: medium;">
+                            <div class="alert alert-warning" role="alert" id="noCollectionsWarning" margin-top: 12px;">
+                                You do not have any Collected Datasets.
+                            </div>
+                        </div>
+                        {% else %}
+                            {% for dataset in datasets %}
+                            <!-- Existing Dataset -->
+                            <div class="container datasets" id="existingCollectionsContainers">
+                    
+                                <!-- Dataset Template -->
+                                <div class="container rounded dataset">
+                        
+                                    <!-- Dataset metadata (label, date) -->
+                                    <div class="container">
+                                        <div class="row border border-dark">
+                                            <div class="col-lg-6">
+                                                Dataset Label: <span class="rounded metadata">{{dataset}}</span>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                Upload Date: <span class="rounded metadata">{{datasets[dataset].date}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                            
+                                    <!-- Dataset metadata (records, size) -->
+                                    <div class="container">
+                                        <div class="row border border-dark">
+                                            <div class="col-lg-6">
+                                                Records: <span class="rounded metadata">{{datasets[dataset].lines}}</span>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                Size: <span class="rounded metadata">{{datasets[dataset].size}} bytes</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                            
+                                    <!-- Dataset metadata (headers) -->
+                                    <div class="container border border-dark">
+                                        Headers: <span class="rounded metadata">
+                                            {% for header in datasets[dataset].headers %}
+                                                {{header}}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                            </span>
+                                    </div>
+
+                                    <!-- Dataset Delete Button -->
+                                    <form class="form-group container" method="post">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <a class="btn btn-dark" href="{{datasets[dataset].download_url}}" role="button">Download Dataset</a>
+                                        <button name="label" type="submit" class="btn btn-danger" value="{{dataset}}">Delete Dataset</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

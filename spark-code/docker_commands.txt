@@ -1,0 +1,21 @@
+-- v1
+dos2unix start-spark.sh
+docker build -t sonem/cluster-apache-spark:3.5.2 .
+docker push sonem/cluster-apache-spark:3.5.2
+
+# You can stop containers to simulate failures or node extraction from the Network.
+
+-- v2
+dos2unix start-spark.sh
+docker build -t sonem/cluster-apache-spark:3.5.2-v2 .
+docker push sonem/cluster-apache-spark:3.5.2-v2
+
+-- v3
+dos2unix start-spark.sh
+docker build -t sonem/cluster-apache-spark:3.5.2-v3 .
+docker push sonem/cluster-apache-spark:3.5.2-v3
+
+-- v4
+dos2unix start-spark.sh
+docker build -t sonem/cluster-apache-spark:3.5.2-v4 .
+docker push sonem/cluster-apache-spark:3.5.2-v4
