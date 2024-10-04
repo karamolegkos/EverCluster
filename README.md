@@ -1,7 +1,7 @@
 # EverCluster
 This repository presents EverCluster, a cloud-based platform intended to make clustering workflow more straightforward and efficient. With EverCluster, users can set up clustering parameters, upload datasets, and get algorithm recommendations based on how well their algorithms perform across a range of criteria. Using machine learning models, the platform suggests clustering techniques based on user preferences for accuracy or speed. Furthermore, EverCluster is designed to function in a variety of deployment scenarios and provides versatility in single- and multi-node configurations.
 
-It is recommended to read the EverCluster.pdf file (not yet pushed) for the comprehensive documentation.
+It is recommended to read the EverCluster.pdf file for the comprehensive documentation.
 
 ## Code Structure
 - [Current Directory](./.): The Thesis PDF, the License, and the README are all located in this directory. To deploy the platform with Docker or Docker Swarm, this directory also contains the docker-compose.yml file.
